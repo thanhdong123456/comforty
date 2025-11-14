@@ -16,6 +16,10 @@ const Navigation = ({ data, isFallback }) => {
   const displayCartItems = isCartDisabled ? [] : cartItems;
   const displayCartCount = isCartDisabled ? 0 : cartCount;
 
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
   return (
     <nav className="text-white w-full bg-[#272343]">
       <div className="w-full border-b border-gray-700">
@@ -118,11 +122,14 @@ const Navigation = ({ data, isFallback }) => {
                 alt="Heart"
               />
             </button>
-            <button className="w-[40px] flex items-center justify-center h-[40px] bg-white border border-gray-300 rounded-md hover:text-[#007580] transition">
+            <button
+              onClick={handleLogin}
+              className="w-[40px] flex items-center justify-center h-[40px] bg-white border border-gray-300 rounded-md hover:text-[#007580] transition"
+            >
               <img
                 src="/icons/User.png"
                 className="w-[22px] h-[22px] object-cover"
-                alt="User"
+                alt="Login"
               />
             </button>
             <AnimatePresence>
