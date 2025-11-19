@@ -80,6 +80,13 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
 }
 
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #029fae;
+  cursor: pointer;
+}
+
 /* Firefox */
 input[type="number"] {
   -moz-appearance: textfield;

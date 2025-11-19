@@ -1,59 +1,55 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Footer from "../common/Footer";
 import Copyright from "../common/Copyright";
 import Navigation from "../components/Navigation";
 import { useNavigate } from "react-router-dom";
 import { FiChevronRight, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
 
-const Login = () => {
+const Register = () => {
   const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const savedEmail = localStorage.getItem("rememberEmail");
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRemember(true);
-    }
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          fullName,
           email,
           password,
+          confirmPassword,
+          termsAccepted,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
         console.log(data);
-        setError(data.message || data.errors || "Login failed");
+        setError(data.message || data.errors || "Registration failed");
       } else {
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        if (remember) {
-          localStorage.setItem("rememberEmail", email);
-        } else {
-          localStorage.removeItem("rememberEmail");
-        }
-
-        setSuccess("Login successful.");
+        setSuccess("Register successful! Please login.");
         setError("");
-        navigate("/");
+        navigate("/login");
       }
     } catch (err) {
       console.log(err);
@@ -80,11 +76,11 @@ const Login = () => {
             <FiChevronRight />
             <span className="cursor-pointer">Account</span>
             <FiChevronRight />
-            <span>Sign In</span>
+            <span>Sign Up</span>
           </div>
           <div className="px-4 mt-[12px]">
             <h3 className="text-[24px] max-lg:text-[22px] max-md:text-[18px] font-semibold leading-[110%] ">
-              Sign In
+              Sign Up
             </h3>
           </div>
         </div>
@@ -95,9 +91,16 @@ const Login = () => {
           className="flex flex-col my-[80px] max-md:my-[40px] p-[32px] max-md:p-[20px]  w-[648px] max-md:w-full  h-auto bg-white shadow"
         >
           <h3 className="text-[32px] flex max-lg:text-[22px] max-md:text-[18px] items-center justify-center font-semibold leading-[110%]">
-            Sign In
+            Create Account
           </h3>
           <div className="flex flex-col justify-between space-y-[16px] mt-[24px]">
+            <input
+              type="text"
+              placeholder="Full Name"
+              className="w-full h-[50px] bg-[#f5f6f7] px-[20px] rounded-[8px] text-[9A9CAA]"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
             <input
               type="email"
               placeholder="Email"
@@ -113,6 +116,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+
               <div
                 className="absolute right-0 top-1/2 -translate-y-1/2 mr-[20px] cursor-pointer text-gray-500"
                 onClick={() => setShowPassword(!showPassword)}
@@ -120,28 +124,37 @@ const Login = () => {
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </div>
             </div>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm Password"
+                className="w-full h-[50px] bg-[#f5f6f7] px-[20px] rounded-[8px]"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+
+              <div
+                className="absolute right-0 top-1/2 -translate-y-1/2 mr-[20px] cursor-pointer text-gray-500"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+              </div>
+            </div>
           </div>
           <div className="flex flex-row justify-between items-center mt-[20px] text-[16px] max-md:text-[14px]">
             <div className="flex items-center gap-[8px]">
               <input
                 type="checkbox"
-                checked={remember}
-                onChange={() => setRemember(!remember)}
+                id="terms"
+                checked={termsAccepted}
+                onChange={() => setTermsAccepted(!termsAccepted)}
               />
-              <label>Remember Me</label>
-            </div>
-            <div>
-              <a
-                href="#"
-                className="text-[14px] text-[#007580] font-medium leading-[110%] hover:underline "
-              >
-                Forget Password
-              </a>
+              <label>I agree to the Terms & Conditions</label>
             </div>
           </div>
           <div className="w-full mt-[24px]">
             <button className="w-full bg-[#029FAE] py-[17px] max-md:py-[15px] text-white rounded-[8px] font-semibold flex items-center justify-center gap-[12px] hover:bg-[#027c82] ">
-              Sign In <FiArrowRight />
+              Sign Up <FiArrowRight />
             </button>
             {error && (
               <div className="text-[#f10d20] text-[16px] mt-[20px] text-center">
@@ -156,12 +169,12 @@ const Login = () => {
           </div>
 
           <div className="w-full flex justify-center items-center my-[24px] text-[16px] md:text-[14px] gap-1 leading-[110%]">
-            <span>Don’t have account?</span>
+            <span>Already have an account?</span>
             <a
               className="text-[#007580] font-medium hover:underline cursor-pointer"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/login")}
             >
-              Sign Up
+              Sign In
             </a>
           </div>
         </form>
@@ -180,4 +193,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

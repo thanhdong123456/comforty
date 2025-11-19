@@ -6,6 +6,7 @@ import * as fallbackData from "../../../database/data/siteData";
 import { toast, ToastContainer } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { CartProvider } from "../context/CartContext";
+import { AuthProvider } from "../context/AuthContext";
 
 const LandingPage = () => {
   const [landingData, setLandingData] = useState(null);
@@ -50,17 +51,19 @@ const LandingPage = () => {
   }
 
   return (
-    <CartProvider isFallback={isFallback}>
-      {showFallbackNotice && (
-        <div className="w-full text-center bg-yellow-100 text-yellow-700 py-2 px-3 sm:py-3 sm:px-6 text-xs sm:text-sm md:text-base font-medium leading-tight tracking-wide transition-opacity duration-700">
-          Đang hiển thị giao diện với dữ liệu rỗng
-          <span className="hidden sm:inline">(server chưa kết nối)</span>
-        </div>
-      )}
-      <Layout data={landingData} isFallback={isFallback} />
+    <AuthProvider>
+      <CartProvider isFallback={isFallback}>
+        {showFallbackNotice && (
+          <div className="w-full text-center bg-yellow-100 text-yellow-700 py-2 px-3 sm:py-3 sm:px-6 text-xs sm:text-sm md:text-base font-medium leading-tight tracking-wide transition-opacity duration-700">
+            Đang hiển thị giao diện với dữ liệu rỗng
+            <span className="hidden sm:inline">(server chưa kết nối)</span>
+          </div>
+        )}
+        <Layout data={landingData} isFallback={isFallback} />
 
-      <ToastContainer position="top-right" autoClose={3000} />
-    </CartProvider>
+        <ToastContainer position="top-right" autoClose={3000} />
+      </CartProvider>
+    </AuthProvider>
   );
 };
 

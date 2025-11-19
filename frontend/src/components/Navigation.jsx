@@ -1,8 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiShoppingCart, FiMenu, FiX } from "react-icons/fi";
+import { FiShoppingCart, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 const Navigation = ({ data, isFallback }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -10,6 +11,14 @@ const Navigation = ({ data, isFallback }) => {
   const { cartItems, cartCount } = useCart();
   const navigate = useNavigate();
   const cartRef = useRef(null);
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
   if (!data) return null;
 
   const isCartDisabled = isFallback;
@@ -18,6 +27,13 @@ const Navigation = ({ data, isFallback }) => {
 
   const handleLogin = () => {
     navigate("/login");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
+    window.location.reload();
   };
 
   return (
@@ -88,7 +104,7 @@ const Navigation = ({ data, isFallback }) => {
             </div>
           </div>
 
-          <div className="relative flex gap-3" ref={cartRef}>
+          <div className="relative flex gap-3 max-lg:gap-2" ref={cartRef}>
             <button
               onClick={() => {
                 setShowCart(false);
@@ -115,23 +131,48 @@ const Navigation = ({ data, isFallback }) => {
                 </div>
               )}
             </button>
-            <button className="w-[40px] flex items-center justify-center h-[40px] bg-white border border-gray-300 rounded-md hover:text-[#007580] transition">
+            <button className="w-[40px] flex max-md:hidden items-center justify-center h-[40px] bg-white border border-gray-300 rounded-md hover:text-[#007580] transition">
               <img
                 src="/icons/Heart.png"
                 className="w-[22px] h-[22px] object-cover"
                 alt="Heart"
               />
             </button>
-            <button
-              onClick={handleLogin}
-              className="w-[40px] flex items-center justify-center h-[40px] bg-white border border-gray-300 rounded-md hover:text-[#007580] transition"
-            >
-              <img
-                src="/icons/User.png"
-                className="w-[22px] h-[22px] object-cover"
-                alt="Login"
-              />
-            </button>
+            {user ? (
+              <div className="relative group flex items-center">
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <img
+                    src={user.avatar || "/image/default-avatar.png"}
+                    className="w-[32px] h-[32px] max-lg:w-[28px] max-lg:h-[28px] max-sm:w-[22px] max-sm:h-[22px] rounded-full object-cover border border-gray-300"
+                    alt="Avatar"
+                  />
+                  <span className="text-[14px] max-md:text-[12px] font-medium text-[#272343]  leading-[110%]">
+                    {user.fullName}
+                  </span>
+                </div>
+                <div className="absolute -right-5 mt-[80px] w-[150px] bg-white shadow-lg border border-gray-300 rounded-md z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-between px-[16px] py-[8px] text-[14px] text-[#272343] hover:text-[#029FAE] hover:bg-gray-100 rounded-md"
+                  >
+                    <span>Sign out</span>
+                    <FiLogOut className="w-[16px] h-[16px]" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={handleLogin}
+                className="w-[40px] flex items-center justify-center h-[40px] bg-white border border-gray-300 rounded-md hover:text-[#007580] transition"
+              >
+                <img
+                  src="/icons/User.png"
+                  className="w-[22px] h-[22px] object-cover"
+                  alt="Login"
+                />
+              </button>
+            )}
+
             <AnimatePresence>
               {showCart && (
                 <motion.div

@@ -10,6 +10,7 @@ import Cart1 from "./page/Cart1.jsx";
 import Products from "./page/Products.jsx";
 import ProductDetail from "./page/ProductDetail.jsx";
 import Login from "./authPage/Login.jsx";
+import Register from "./authPage/Register.jsx";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         <Route path="/cart" element={<Cart />} />
         <Route path="/cart1" element={<Cart1 />} />
