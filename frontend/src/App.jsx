@@ -11,6 +11,8 @@ import Products from "./page/Products.jsx";
 import ProductDetail from "./page/ProductDetail.jsx";
 import Login from "./authPage/Login.jsx";
 import Register from "./authPage/Register.jsx";
+import ForgotPassword from "./authPage/ForgotPassword.jsx";
+import ResetPassword from "./authPage/ResetPassword.jsx";
 
 const App = () => {
   return (
@@ -19,6 +21,8 @@ const App = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/login/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         <Route path="/cart" element={<Cart />} />
         <Route path="/cart1" element={<Cart1 />} />

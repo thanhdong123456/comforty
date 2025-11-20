@@ -769,7 +769,6 @@ export const recentlyAddedData = {
       status: "New",
       tagColor: "bg-[#01AD5A]",
     },
-
     {
       id: 5,
       categoryId: categories.table.id,

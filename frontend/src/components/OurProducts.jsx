@@ -64,66 +64,68 @@ const OurProducts = ({ data }) => {
       </div>
 
       {hasData ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10 sm:gap-y-8">
-          {products.map((item) => (
-            <div
-              key={item.id}
-              className="group overflow-hidden transition-all duration-300 cursor-pointer"
-            >
-              <div className="relative w-full h-[220px] sm:h-[260px] md:h-[312px] rounded-[6px] overflow-hidden aspect-square md:aspect-auto">
-                <img
-                  src={item.image || "/fallback-product.jpg"}
-                  alt={item.name || "Product"}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+        <div className="max-h-[800px] overflow-y-auto hide-scrollbar  px-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10 sm:gap-y-8">
+            {products.map((item) => (
+              <div
+                key={item.id}
+                className="group overflow-hidden transition-all duration-300 cursor-pointer"
+              >
+                <div className="relative w-full h-[220px] sm:h-[260px] md:h-[312px] rounded-[6px] overflow-hidden aspect-square md:aspect-auto">
+                  <img
+                    src={item.image || "/fallback-product.jpg"}
+                    alt={item.name || "Product"}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
 
-                {item.status && (
-                  <span
-                    className={`absolute flex top-3 left-3 sm:top-4 sm:left-4 text-white text-[11px] sm:text-[13px] font-semibold px-2 sm:px-3 py-[2px] sm:py-1 items-center rounded-sm shadow-md ${
-                      item.tagColor || "bg-teal-500"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                )}
-
-                <button
-                  onClick={() => toggleLike(item.id)}
-                  className="absolute top-3 right-3 sm:top-4 sm:right-5 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-sm bg-white/90 hover:bg-red-50 shadow-md transition-all duration-300"
-                >
-                  {liked[item.id] ? (
-                    <AiFillHeart className="text-red-500 text-[16px] sm:text-[18px]" />
-                  ) : (
-                    <AiOutlineHeart className="text-gray-600 hover:text-red-500 text-[16px] sm:text-[18px]" />
-                  )}
-                </button>
-              </div>
-
-              <div className="sm:py-4 lg:py-0 lg:mt-[14px] mt-4 xs:mt-10 md:mt-0">
-                <span className="font-normal text-[14px] sm:text-[16px] leading-[130%] text-[#272343] transition-colors duration-300 group-hover:text-[#029FAE] block truncate">
-                  {item.name || "Sản phẩm chưa có tên"}
-                </span>
-                <div className="flex items-center justify-between mt-1">
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <span className="font-semibold text-[16px] sm:text-[18px] leading-[110%] text-[#272343] capitalize">
-                      {item.price || "Liên hệ"}
+                  {item.status && (
+                    <span
+                      className={`absolute flex top-3 left-3 sm:top-4 sm:left-4 text-white text-[11px] sm:text-[13px] font-semibold px-2 sm:px-3 py-[2px] sm:py-1 items-center rounded-sm shadow-md ${
+                        item.tagColor || "bg-teal-500"
+                      }`}
+                    >
+                      {item.status}
                     </span>
-                    {item.oldPrice && (
-                      <span className="text-xs sm:text-sm font-normal text-[#9A9CAA] line-through">
-                        {item.oldPrice}
-                      </span>
-                    )}
-                  </div>
+                  )}
+
                   <button
-                    onClick={() => handleAddToCart(item)}
-                    className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-md bg-gray-100 text-[#272343] transition-all duration-300 group-hover:bg-[#029FAE] group-hover:text-white -translate-y-[20%] sm:-translate-y-[30%]"
+                    onClick={() => toggleLike(item.id)}
+                    className="absolute top-3 right-3 sm:top-4 sm:right-5 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-sm bg-white/90 hover:bg-red-50 shadow-md transition-all duration-300"
                   >
-                    <FiShoppingCart className="text-[16px] sm:text-[18px]" />
+                    {liked[item.id] ? (
+                      <AiFillHeart className="text-red-500 text-[16px] sm:text-[18px]" />
+                    ) : (
+                      <AiOutlineHeart className="text-gray-600 hover:text-red-500 text-[16px] sm:text-[18px]" />
+                    )}
                   </button>
                 </div>
+
+                <div className="sm:py-4 lg:py-0 lg:mt-[14px] mt-4 xs:mt-10 md:mt-0">
+                  <span className="font-normal text-[14px] sm:text-[16px] leading-[130%] text-[#272343] transition-colors duration-300 group-hover:text-[#029FAE] block truncate">
+                    {item.name || "Sản phẩm chưa có tên"}
+                  </span>
+                  <div className="flex items-center justify-between mt-1">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <span className="font-semibold text-[16px] sm:text-[18px] leading-[110%] text-[#272343] capitalize">
+                        {item.price || "Liên hệ"}
+                      </span>
+                      {item.oldPrice && (
+                        <span className="text-xs sm:text-sm font-normal text-[#9A9CAA] line-through">
+                          {item.oldPrice}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleAddToCart(item)}
+                      className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-md bg-gray-100 text-[#272343] transition-all duration-300 group-hover:bg-[#029FAE] group-hover:text-white -translate-y-[20%] sm:-translate-y-[30%]"
+                    >
+                      <FiShoppingCart className="text-[16px] sm:text-[18px]" />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
         <div className="w-full text-center text-gray-500 text-sm sm:text-base md:text-lg font-medium py-10 sm:py-16 md:py-20 px-4">
