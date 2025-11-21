@@ -126,26 +126,15 @@ const forgotPassword = async (req, res) => {
 
 // --- Reset password ---
 const resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body;
-  if (!token || !newPassword) {
-    return res
-      .status(400)
-      .json({ message: "Token and new password are required" });
+  const { newPassword } = req.body;
+  if (!newPassword) {
+    return res.status(400).json({ message: "New password is required" });
   }
   try {
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-    const now = Date.now();
-    const [users] = await db.query(
-      "SELECT * FROM users WHERE resetToken = ? AND resetTokenExpires > ?",
-      [hashedToken, now]
-    );
-    if (users.length === 0) {
-      return res.status(400).json({ message: "Invalid or expired token" });
-    }
-    const user = users[0];
+    const user = req.user;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await db.query(
-      "UPDATE users SET password = ? , resetToken = NULL, resetTokenExpires = NULL WHERE id = ?",
+      "UPDATE users SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE id = ?",
       [hashedPassword, user.id]
     );
     return res
@@ -156,27 +145,5 @@ const resetPassword = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
-// const verifyResetToken = async (req, res) => {
-//   const { token } = req.params;
-//   if (!token) {
-//     return res.status(400).json({ message: "Token is required" });
-//   }
-//   try {
-//     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-//     const now = Date.now();
-//     const [users] = await db.query(
-//       "SELECT id FROM users WHERE resetToken = ? AND resetTokenExpires > ?",
-//       [hashedToken, now]
-//     );
-//     if (users.length === 0) {
-//       return res.status(400).json({ message: "Invalid or expired token" });
-//     }
-//     return res.status(200).json({ message: "Token valid" });
-//   } catch (err) {
-//     console.error(err);
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
 
 module.exports = { register, login, forgotPassword, resetPassword };
