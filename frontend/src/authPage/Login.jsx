@@ -4,6 +4,7 @@ import Copyright from "../common/Copyright";
 import Navigation from "../components/Navigation";
 import { useNavigate } from "react-router-dom";
 import { FiChevronRight, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const { setUserProfile, login } = useAuth();
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberEmail");
@@ -29,34 +31,14 @@ const Login = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        console.log(data);
-        setError(data.message || data.errors || "Login failed");
-      } else {
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        if (remember) {
-          localStorage.setItem("rememberEmail", email);
-        } else {
-          localStorage.removeItem("rememberEmail");
-        }
-
-        setSuccess("Login successful.");
-        setError("");
-        navigate("/");
-      }
+      const loggedInUser = await login(email, password);
+      if (remember) localStorage.setItem("rememberEmail", email);
+      else localStorage.removeItem("rememberEmail");
+      setUserProfile(loggedInUser);
+      navigate("/");
     } catch (err) {
       console.log(err);
-      setError("Server error. Please try again.");
+      setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -100,9 +82,13 @@ const Login = () => {
             <input
               type="email"
               placeholder="Email"
-              className="w-full h-[50px] bg-[#f5f6f7] px-[20px] rounded-[8px] text-[9A9CAA]"
+              className="w-full h-[50px] bg-[#f5f6f7] px-[20px] rounded-[8px] text-[#9A9CAA]"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+                setSuccess("");
+              }}
             />
             <div className="relative">
               <input

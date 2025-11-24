@@ -1,11 +1,19 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { toast } from "react-toastify";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children, isFallback }) => {
+  const { user } = useAuth();
+  const getCartKey = () => {
+    return user ? `cartItems_${user.id}` : "cartItems_guest";
+  };
+
   const [cartItems, setCartItems] = useState(() => {
     try {
-      const stored = localStorage.getItem("cartItems");
+      if (!user) return [];
+      const stored = localStorage.getItem(`cartItems_${user.id}`);
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
@@ -13,24 +21,29 @@ export const CartProvider = ({ children, isFallback }) => {
   });
 
   useEffect(() => {
-    if (!isFallback) {
-      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    if (user && !isFallback) {
+      const stored = localStorage.getItem(`cartItems_${user.id}`);
+      setCartItems(stored ? JSON.parse(stored) : []);
+    } else {
+      setCartItems([]);
     }
-  }, [cartItems, isFallback]);
+  }, [user, isFallback]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("cartItems");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (JSON.stringify(parsed) !== JSON.stringify(cartItems)) {
-        setCartItems(parsed);
-      }
+    if (user && !isFallback) {
+      try {
+        localStorage.setItem(`cartItems_${user.id}`, JSON.stringify(cartItems));
+      } catch {}
     }
-  }, []);
+  }, [cartItems, user, isFallback]);
 
   const addToCart = (product, quantity = 1) => {
-    if (!product || !product.id) return;
+    if (!user) {
+      toast.error("Please login to purchase");
 
+      return false;
+    }
+    if (!product || !product.id) return false;
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
@@ -43,15 +56,29 @@ export const CartProvider = ({ children, isFallback }) => {
         return [...prev, { ...product, quantity }];
       }
     });
+
+    return true;
   };
 
   const removeFromCart = (id) => {
+    if (!user) {
+      toast.error("Please login to purchase");
+      return;
+    }
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = () => {
+    if (!user) return;
+    setCartItems([]);
+    toast.success("All items removed from your cart!");
+  };
 
   const increaseQuantity = (id) => {
+    if (!user) {
+      toast.error("Please login to purchase");
+      return;
+    }
     setCartItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, quantity: item.quantity + 1 } : item
@@ -60,6 +87,10 @@ export const CartProvider = ({ children, isFallback }) => {
   };
 
   const decreaseQuantity = (id) => {
+    if (!user) {
+      toast.error("Please login to purchase");
+      return;
+    }
     setCartItems((prev) =>
       prev
         .map((item) =>
@@ -72,6 +103,10 @@ export const CartProvider = ({ children, isFallback }) => {
   };
 
   const setQuantity = (id, quantity) => {
+    if (!user) {
+      toast.error("Please login to purchase");
+      return;
+    }
     setCartItems((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, quantity: Math.max(quantity, 1) } : item

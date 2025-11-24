@@ -1,25 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Navigation from "../components/Navigation";
 import Footer from "../common/Footer";
 import Copyright from "../common/Copyright";
-import { FiChevronRight, FiMinus, FiPlus } from "react-icons/fi";
+import ProductsSlider from "../common/ProductsSlider";
+import { FaArrowRightLong, FaArrowLeftLong } from "react-icons/fa6";
+import {
+  FiChevronRight,
+  FiMinus,
+  FiPlus,
+  FiShoppingCart,
+} from "react-icons/fi";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { categories, featuredProducts } from "../../../database/data/siteData";
 import ReactStars from "react-rating-stars-component";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 
 const ProductDetail = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
   const product = featuredProducts.items.find((item) => item.id === Number(id));
-  const { addToCart, increaseQuantity, decreaseQuantity, setQuantity } =
-    useCart();
+  const { addToCart, setQuantity } = useCart();
   const [inputValues, setInputValues] = useState({});
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  const location = useLocation;
+  const location = useLocation();
 
   const handleBuyNow = () => {
+    if (!user) {
+      toast.error("Please log in to continue shopping!");
+      return;
+    }
     addToCart(product);
     navigate(`/cart?selected=${product.id}`);
   };
@@ -49,11 +61,25 @@ const ProductDetail = () => {
     (cate) => cate.id === product?.categoryId
   );
   const handleAddToCart = (product) => {
+    if (!user) {
+      toast.error("Please log in to continue shopping!");
+      return;
+    }
     const quantityToAdd =
       parseInt(inputValues[product.id] ?? product.quantity, 10) || 1;
     addToCart(product, quantityToAdd);
     toast.success("Thêm vào giỏ hàng thành công");
   };
+
+  const relatedProducts = featuredProducts.items.filter(
+    (item) => item.categoryId === product?.categoryId && item.id !== product.id
+  );
+
+  const prevRef = useRef(null);
+  const nextRef = useRef(null);
+  const hasData =
+    relatedProducts &&
+    (relatedProducts.items?.length > 0 || relatedProducts.length > 0);
 
   return (
     <div className="w-full min-h-screen flex flex-col">
@@ -82,7 +108,6 @@ const ProductDetail = () => {
             <FiChevronRight />
             <span>{product.name}</span>
           </div>
-
           <div className="flex max-sm:flex-col gap-[50px] max-md:gap-[40px] ">
             <div className="w-[50%] max-sm:w-full flex justify-start">
               <img
@@ -214,6 +239,44 @@ const ProductDetail = () => {
                     Buy Now
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+          <div className="w-full bg-white">
+            <div className="max-w-[1320px] mx-auto py-6 max-md:py-4">
+              <div className="flex items-center justify-between mb-[40px] max-md:mb-[30px] max-sm:mb-[20px]">
+                <h3 className="text-[28px] max-lg:text-[22px] max-sm:text-[18px]  font-semibold text-[#272343]">
+                  Products related to {category.name}
+                </h3>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <button
+                    ref={prevRef}
+                    className="w-11 h-11 max-sm:w-8 max-sm:h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-teal-500 hover:text-white transition-all duration-300"
+                  >
+                    <FaArrowLeftLong className="text-[14px] sm:text-[16px]" />
+                  </button>
+                  <button
+                    ref={nextRef}
+                    className="w-8 h-8 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-gray-100 hover:bg-teal-500 hover:text-white transition-all duration-300"
+                  >
+                    <FaArrowRightLong className="text-[14px] sm:text-[16px]" />
+                  </button>
+                </div>
+              </div>
+              <div>
+                {hasData ? (
+                  <ProductsSlider
+                    products={relatedProducts.items || relatedProducts}
+                    prevRef={prevRef}
+                    nextRef={nextRef}
+                    extraMt={48}
+                    disableTitleMt={true}
+                  />
+                ) : (
+                  <div className="w-full text-center text-gray-500 text-sm sm:text-base md:text-lg font-medium py-10 sm:py-16 md:py-20 px-4">
+                    No featured product data available to display.
+                  </div>
+                )}
               </div>
             </div>
           </div>
