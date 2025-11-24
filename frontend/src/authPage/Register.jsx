@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Footer from "../common/Footer";
 import Copyright from "../common/Copyright";
 import Navigation from "../components/Navigation";
-import { useNavigate } from "react-router-dom";
+import { Form, useNavigate } from "react-router-dom";
 import { FiChevronRight, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
 
 const Register = () => {

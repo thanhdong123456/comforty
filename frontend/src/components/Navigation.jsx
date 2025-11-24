@@ -1,39 +1,40 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiShoppingCart, FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { FaChevronDown } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 const Navigation = ({ data, isFallback }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCart, setShowCart] = useState(false);
-  const { cartItems, cartCount } = useCart();
+  const { cartItems, cartCount, clearCart } = useCart();
   const navigate = useNavigate();
   const cartRef = useRef(null);
-  const [user, setUser] = useState(null);
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
+  const { user, logout } = useAuth();
 
   if (!data) return null;
 
   const isCartDisabled = isFallback;
-  const displayCartItems = isCartDisabled ? [] : cartItems;
-  const displayCartCount = isCartDisabled ? 0 : cartCount;
+  const displayCartItems = !user || isCartDisabled ? [] : cartItems;
+  const displayCartCount = !user || isCartDisabled ? 0 : cartCount;
 
-  const handleLogin = () => {
-    navigate("/login");
+  const handleCartClick = () => {
+    if (!user) {
+      toast.error("Please login to purchase");
+      navigate("/login");
+      return;
+    }
+    setShowCart(false);
+    setTimeout(() => navigate("/cart"), 100);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    logout();
+    clearCart();
     navigate("/");
-    window.location.reload();
   };
 
   return (
@@ -50,13 +51,20 @@ const Navigation = ({ data, isFallback }) => {
           </p>
 
           <div className="hidden md:flex items-center gap-4 text-sm">
-            <select className="bg-transparent text-gray-400 rounded px-2 py-1 hover:text-white transition">
-              {data?.languages?.map((lang) => (
-                <option key={lang.value} value={lang.value}>
-                  {lang.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative w-fit">
+              <select className="appearance-none bg-transparent text-gray-400 rounded px-2 py-1 pr-6 hover:text-white transition">
+                {data?.languages?.map((lang) => (
+                  <option
+                    key={lang.value}
+                    value={lang.value}
+                    className="text-black"
+                  >
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+              <FaChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+            </div>
 
             <a
               href="#"
@@ -106,11 +114,8 @@ const Navigation = ({ data, isFallback }) => {
 
           <div className="relative flex gap-3 max-lg:gap-2" ref={cartRef}>
             <button
-              onClick={() => {
-                setShowCart(false);
-                setTimeout(() => navigate("/cart"), 100);
-              }}
-              onMouseEnter={() => setShowCart(true)}
+              onClick={handleCartClick}
+              onMouseEnter={() => user && setShowCart(true)}
               onMouseLeave={() => setShowCart(false)}
               className="relative gap-2 flex items-center justify-center w-[110px] sm:w-[120px] h-[40px] bg-white border border-gray-300 rounded-md hover:text-[#007580] hover:bg-gray-50 transition"
             >
@@ -124,7 +129,6 @@ const Navigation = ({ data, isFallback }) => {
                   Cart
                 </span>
               </div>
-
               {displayCartCount > 0 && (
                 <div className="bg-[#007580] text-white text-[11px] font-semibold w-5 h-5 flex items-center justify-center rounded-full leading-none">
                   {displayCartCount}
@@ -162,7 +166,7 @@ const Navigation = ({ data, isFallback }) => {
               </div>
             ) : (
               <button
-                onClick={handleLogin}
+                onClick={() => navigate("/login")}
                 className="w-[40px] flex items-center justify-center h-[40px] bg-white border border-gray-300 rounded-md hover:text-[#007580] transition"
               >
                 <img

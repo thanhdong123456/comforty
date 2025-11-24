@@ -1,12 +1,9 @@
-// LandingPage.jsx (chỉ phần thay đổi)
 import React, { useState, useEffect } from "react";
 import Layout from "../common/Layout";
 import axios from "axios";
 import * as fallbackData from "../../../database/data/siteData";
 import { toast, ToastContainer } from "react-toastify";
 import { ClipLoader } from "react-spinners";
-import { CartProvider } from "../context/CartContext";
-import { AuthProvider } from "../context/AuthContext";
 
 const LandingPage = () => {
   const [landingData, setLandingData] = useState(null);
@@ -24,7 +21,6 @@ const LandingPage = () => {
         setLandingData(res.data || {});
       } catch (err) {
         console.error("API error:", err.message);
-        // setLandingData({});
         setIsFallback(true);
       } finally {
         setLoading(false);
@@ -51,19 +47,16 @@ const LandingPage = () => {
   }
 
   return (
-    <AuthProvider>
-      <CartProvider isFallback={isFallback}>
-        {showFallbackNotice && (
-          <div className="w-full text-center bg-yellow-100 text-yellow-700 py-2 px-3 sm:py-3 sm:px-6 text-xs sm:text-sm md:text-base font-medium leading-tight tracking-wide transition-opacity duration-700">
-            Đang hiển thị giao diện với dữ liệu rỗng
-            <span className="hidden sm:inline">(server chưa kết nối)</span>
-          </div>
-        )}
-        <Layout data={landingData} isFallback={isFallback} />
-
-        <ToastContainer position="top-right" autoClose={3000} />
-      </CartProvider>
-    </AuthProvider>
+    <>
+      {showFallbackNotice && (
+        <div className="w-full text-center bg-yellow-100 text-yellow-700 py-2 px-3 sm:py-3 sm:px-6 text-xs sm:text-sm md:text-base font-medium leading-tight tracking-wide transition-opacity duration-700">
+          Đang hiển thị giao diện với dữ liệu rỗng
+          <span className="hidden sm:inline">(server chưa kết nối)</span>
+        </div>
+      )}
+      <Layout data={landingData} isFallback={isFallback} />
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
   );
 };
 

@@ -1,11 +1,5 @@
 import axios from "axios";
-import {
-  Children,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
@@ -17,37 +11,76 @@ export const AuthProvider = ({ children }) => {
     import.meta.env.VITE_REACT_APP_BACKEND_BASEURL || "http://localhost:5000";
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchProfile = async () => {
+    const init = async () => {
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          setUser(null);
+        }
+      }
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
         const res = await axios.get(`${BASE}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (res?.data?.user) {
+          setUser(res.data.user);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+        }
       } catch (err) {
-        console.error(err?.response?.data || err.message);
-        localStorage.removeItem("token");
-        setUser(null);
-      } finally {
-        setLoading(false);
+        console.warn(
+          "Token expired or error occurred, but DO NOT log out automatically."
+        );
       }
-      fetchProfile();
+
+      setLoading(false);
     };
+
+    init();
   }, []);
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
-  const setUserProfile = (profile) => setUser(profile);
+  const login = async (email, password) => {
+    try {
+      const res = await axios.post(`${BASE}/api/auth/login`, {
+        email,
+        password,
+      });
+      const { token, user } = res.data;
+
+      if (token) localStorage.setItem("token", token);
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+        setUser(user);
+      }
+
+      return user;
+    } catch (err) {
+      throw err.response?.data || { message: "Login failed" };
+    }
+  };
+
+  const setUserProfile = (profile) => {
+    setUser(profile);
+    localStorage.setItem("user", JSON.stringify(profile));
+  };
 
   return (
-    <AuthContext.Provider value={{ user, setUserProfile, loading, logout }}>
+    <AuthContext.Provider
+      value={{ user, setUserProfile, loading, logout, login }}
+    >
       {children}
     </AuthContext.Provider>
   );

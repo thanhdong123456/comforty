@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import { FiShoppingCart } from "react-icons/fi";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { toast } from "react-toastify";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const ProductsSlider = ({
   products = [],
@@ -17,14 +18,17 @@ const ProductsSlider = ({
   const slidesToShow = 4;
   const [liked, setLiked] = useState({});
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const toggleLike = (id) => {
     setLiked((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleAddToCart = (item) => {
-    addToCart(item);
-    toast.success(`${item.name} đã được thêm vào giỏ hàng!`);
+    const res = addToCart(item);
+    if (res) {
+      toast.success(`${item.name} đã được thêm vào giỏ hàng!`);
+    }
   };
 
   return (
@@ -58,7 +62,13 @@ const ProductsSlider = ({
       >
         {products.map((item) => (
           <SwiperSlide key={item.id}>
-            <div className="group cursor-pointer overflow-hidden transition-all duration-300">
+            <div
+              onClick={() => {
+                navigate(`/products/${item.id}`);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="group cursor-pointer overflow-hidden transition-all duration-300"
+            >
               <div className="relative w-full h-[220px] sm:h-[260px] md:h-[312px] rounded-[6px] overflow-hidden">
                 <img
                   src={item.image}
@@ -81,7 +91,10 @@ const ProductsSlider = ({
                 )}
 
                 <button
-                  onClick={() => toggleLike(item.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLike(item.id);
+                  }}
                   className="absolute top-3 right-3 sm:top-4 sm:right-5 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-sm bg-white/90 hover:bg-red-50 shadow-md transition-all duration-300"
                 >
                   {liked[item.id] ? (
@@ -110,7 +123,10 @@ const ProductsSlider = ({
                   </div>
 
                   <button
-                    onClick={() => handleAddToCart(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(item);
+                    }}
                     className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-md bg-gray-100 text-[#272343] transition-all duration-300 group-hover:bg-[#029FAE] group-hover:text-white -translate-y-[20%] sm:-translate-y-[30%]"
                   >
                     <FiShoppingCart className="text-[16px] sm:text-[18px]" />

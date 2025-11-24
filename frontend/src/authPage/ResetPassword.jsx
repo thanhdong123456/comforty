@@ -1,44 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Footer from "../common/Footer";
 import Copyright from "../common/Copyright";
 import Navigation from "../components/Navigation";
-import { useNavigate } from "react-router-dom";
-import { FiChevronRight, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate, useParams } from "react-router-dom";
+import { FiChevronRight, FiEye, FiEyeOff } from "react-icons/fi";
+import { TailSpin } from "react-loader-spinner";
 
-const Login = () => {
+const ResetPassword = () => {
+  const { token } = useParams();
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const { setUserProfile, login } = useAuth();
-
-  useEffect(() => {
-    const savedEmail = localStorage.getItem("rememberEmail");
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRemember(true);
-    }
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setSuccess("");
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    setLoading(true);
     try {
-      const loggedInUser = await login(email, password);
-      if (remember) localStorage.setItem("rememberEmail", email);
-      else localStorage.removeItem("rememberEmail");
-      setUserProfile(loggedInUser);
-      navigate("/");
+      const res = await fetch(
+        `http://localhost:5000/api/auth/reset-password/${token}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, newPassword: password }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message);
+      } else {
+        setSuccess("Password reset successful. Redirecting to login...");
+        setTimeout(() => navigate("/login"), 2000);
+      }
     } catch (err) {
-      console.log(err);
-      setError(err.message || "Login failed");
+      console.error(err);
+      setError("Server error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -61,11 +69,18 @@ const Login = () => {
             <FiChevronRight />
             <span className="cursor-pointer">Account</span>
             <FiChevronRight />
-            <span>Sign In</span>
+            <span
+              className="cursor-pointer hover:text-[#007580] transition "
+              onClick={() => navigate("/login")}
+            >
+              Sign In
+            </span>
+            <FiChevronRight />
+            <span>Reset Password</span>
           </div>
           <div className="px-4 mt-[12px]">
             <h3 className="text-[24px] max-lg:text-[22px] max-md:text-[18px] font-semibold leading-[110%] ">
-              Sign In
+              Reset Password
             </h3>
           </div>
         </div>
@@ -76,20 +91,9 @@ const Login = () => {
           className="flex flex-col my-[80px] max-md:my-[40px] p-[32px] max-md:p-[20px]  w-[648px] max-md:w-full  h-auto bg-white shadow"
         >
           <h3 className="text-[32px] flex max-lg:text-[22px] max-md:text-[18px] items-center justify-center font-semibold leading-[110%]">
-            Sign In
+            Reset Password
           </h3>
           <div className="flex flex-col justify-between space-y-[16px] mt-[24px]">
-            <input
-              type="email"
-              placeholder="Email"
-              className="w-full h-[50px] bg-[#f5f6f7] px-[20px] rounded-[8px] text-[#9A9CAA]"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError("");
-                setSuccess("");
-              }}
-            />
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -98,6 +102,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+
               <div
                 className="absolute right-0 top-1/2 -translate-y-1/2 mr-[20px] cursor-pointer text-gray-500"
                 onClick={() => setShowPassword(!showPassword)}
@@ -105,29 +110,41 @@ const Login = () => {
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </div>
             </div>
-          </div>
-          <div className="flex flex-row justify-between items-center mt-[20px] text-[16px] max-md:text-[14px]">
-            <div className="flex items-center gap-[8px]">
+            <div className="relative">
               <input
-                type="checkbox"
-                checked={remember}
-                onChange={() => setRemember(!remember)}
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm Password"
+                className="w-full h-[50px] bg-[#f5f6f7] px-[20px] rounded-[8px]"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
-              <label>Remember Me</label>
-            </div>
-            <div>
-              <button
-                onClick={() => navigate("/login/forgot-password")}
-                className="text-[14px] text-[#007580] font-medium leading-[110%] hover:underline"
+
+              <div
+                className="absolute right-0 top-1/2 -translate-y-1/2 mr-[20px] cursor-pointer text-gray-500"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                Forget Password
-              </button>
+                {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+              </div>
             </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#029FAE] hover:bg-[#027c82] text-white p-3 rounded-md font-semibold flex justify-center"
+            >
+              {loading ? (
+                <TailSpin
+                  height={24}
+                  width={24}
+                  color="#fff"
+                  strokeWidth={3}
+                  ariaLabel="loading"
+                />
+              ) : (
+                <>Reset Password</>
+              )}
+            </button>
           </div>
           <div className="w-full mt-[24px]">
-            <button className="w-full bg-[#029FAE] py-[17px] max-md:py-[15px] text-white rounded-[8px] font-semibold flex items-center justify-center gap-[12px] hover:bg-[#027c82] ">
-              Sign In <FiArrowRight />
-            </button>
             {error && (
               <div className="text-[#f10d20] text-[16px] mt-[20px] text-center">
                 {error}
@@ -138,16 +155,6 @@ const Login = () => {
                 {success}
               </div>
             )}
-          </div>
-
-          <div className="w-full flex justify-center items-center my-[24px] text-[16px] md:text-[14px] gap-1 leading-[110%]">
-            <span>Don’t have account?</span>
-            <a
-              className="text-[#007580] font-medium hover:underline cursor-pointer"
-              onClick={() => navigate("/register")}
-            >
-              Sign Up
-            </a>
           </div>
         </form>
       </div>
@@ -165,4 +172,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ResetPassword;

@@ -15,6 +15,7 @@ const Cart = () => {
     decreaseQuantity,
     getItemTotal,
     setQuantity,
+    clearCart,
   } = useCart();
   const location = useLocation();
   const [selectedItems, setSelectedItems] = useState([]);
@@ -62,19 +63,31 @@ const Cart = () => {
       </header>
       <div className="w-full px-4 xl:px-0 max-w-[1320px] my-4 lg:my-6 mx-auto py-6 grid grid-cols-1 lg:grid-cols-10 gap-0 lg:gap-8 flex-grow">
         <div className="col-span-10 xl:col-span-7 bg-white    ">
-          <div className="grid grid-cols-12 lg:!h-[55px] px-4 lg:px-5 font-semibold text-[#272343]  py-2 lg:text-lg items-center">
-            <div className="col-span-5 flex items-center gap-4">
-              <input
-                type="checkbox"
-                className="w-4 h-4 accent-[#029FAE]"
-                onChange={handleSelectAll}
-                checked={
-                  selectedItems.length === cartItems.length &&
-                  cartItems.length > 0
-                }
-              />
-              <span className=" md:text-xl ">Products</span>
+          <div className="grid grid-cols-12 lg:!h-[55px] px-4 max-sm:px-0 lg:px-5 font-semibold text-[#272343]  py-2 lg:text-lg items-center">
+            <div className="col-span-5 max-sm:col-span-12 flex items-center justify-between py-3 px-4 ">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  className="w-5 h-5 accent-[#029FAE] cursor-pointer"
+                  onChange={handleSelectAll}
+                  checked={
+                    selectedItems.length === cartItems.length &&
+                    cartItems.length > 0
+                  }
+                />
+                <span className="text-lg font-semibold text-gray-700">
+                  Products
+                </span>
+              </div>
+
+              <button
+                onClick={clearCart}
+                className="hidden max-sm:flex px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium shadow transition"
+              >
+                Clear All
+              </button>
             </div>
+
             <span className="col-span-2 text-center items-center justify-center hidden md:flex">
               Price
             </span>
@@ -326,10 +339,16 @@ const Cart = () => {
             <div className="flex justify-between my-5 lg:my-6 mx-5">
               <button
                 onClick={() => navigate("/")}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-[#272343] font-medium transition-shadow "
+                className="flex  items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-[#272343] font-medium transition-shadow "
               >
                 <FaArrowLeft className="w-4 h-4" />
                 Continue Shopping
+              </button>
+              <button
+                onClick={clearCart}
+                className="flex max-sm:hidden px-4 py-2  bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition"
+              >
+                Clear All
               </button>
             </div>
           )}

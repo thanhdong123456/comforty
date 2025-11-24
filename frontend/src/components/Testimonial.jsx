@@ -10,7 +10,7 @@ const Testimonial = ({ testimonials }) => {
   const hasComments = comments.length > 0;
 
   return (
-    <section className="relative w-full py-10 md:py-12 lg:py-20 bg-[#f0f2f3]">
+    <section className="relative w-full py-10 md:py-12 lg:py-20  bg-[#f0f2f3]">
       <div className="w-full px-4 xl:px-0 max-w-[1320px] mx-auto">
         <div className="flex items-center justify-between flex-nowrap gap-3 sm:gap-6 mb-10 text-left">
           <h3 className="text-[18px] xs:text-[20px] sm:text-[24px] lg:text-[32px] font-semibold capitalize text-[#272343] truncate">
